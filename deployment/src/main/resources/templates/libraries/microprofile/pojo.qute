@@ -77,7 +77,7 @@ public class {m.classname} {#if m.parent}extends {m.parent}{/if}{#if m.serializa
     {#for ext in v.vendorExtensions.x-extra-annotation.orEmpty}
     {ext}
     {/for}
-    {#if v.useBeanValidation}{#include beanValidation.qute p=v/}{/if}
+    {#if useBeanValidation}{#include beanValidation.qute p=v/}{/if}
     {#if v.isEnum && v.isContainer}public {v.datatypeWithEnum} {v.getter}(){
         return {v.name};
     }{#else if v.isEnum && !v.isArray && !v.isMap}public {v.datatypeWithEnum} {v.getter}() {

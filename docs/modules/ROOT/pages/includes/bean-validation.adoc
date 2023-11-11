@@ -1,0 +1,3 @@
+The bean validation option could be enabled by `quarkus.openapi-generator.codegen[.spec.my_spec_yaml].use-bean-validation=true`
+
+IMPORTANT: The option `perform-bean-validation` is not implemented, so the validator (like `Hibernate Validator`) have to be added by hand.

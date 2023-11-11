@@ -557,6 +557,51 @@ public class OpenApiClientGeneratorWrapperTest {
         assertThat(types.get(0).getExtendedTypes(0).getName()).isEqualTo(new SimpleName("Mammal"));
     }
 
+    @Test
+    void verifyBeanValidation() throws URISyntaxException, FileNotFoundException {
+        final List<File> generatedFiles = this.createGeneratorWrapper("beanvalidation.yaml")
+                .withBeanValidation(true)
+                .generate("org.beanvalidation");
+
+        final Optional<File> model = generatedFiles.stream()
+                .filter(f -> f.getName().endsWith("Stuff.java")).findFirst();
+        assertThat(model).isPresent();
+        final CompilationUnit cu = StaticJavaParser.parse(model.orElseThrow());
+        final List<MethodDeclaration> methods = cu.findAll(MethodDeclaration.class);
+        checkAnnotation(methods, "getId", List.of("@NotNull", "@Size(min = 5)", "@Size(max = 10)"));
+        checkAnnotation(methods, "getName", List.of("@Pattern(regexp = \"a-zA-Z0-9\")"));
+        checkAnnotation(methods, "getAmount", List.of("@Min(12)", "@Max(99)"));
+        checkAnnotation(methods, "getLength", List.of("@Min(12L)", "@Max(99L)"));
+        checkAnnotation(methods, "getNumber", List.of("@DecimalMin(\"19.76\")", "@DecimalMax(\"20.12\")"));
+
+        final Optional<File> api = generatedFiles.stream()
+                .filter(f -> f.getName().endsWith("DefaultApi.java")).findFirst();
+        assertThat(api).isPresent();
+        final CompilationUnit cuApi = StaticJavaParser.parse(api.orElseThrow());
+        MethodDeclaration doStuff = cuApi.findAll(MethodDeclaration.class, (m) -> "doStuffPost".equals(m.getNameAsString()))
+                .get(0);
+        List<String> parameterAnnotations = doStuff.getParameter(0)
+                .getAnnotations()
+                .stream()
+                .map(a -> a.toString())
+                .collect(Collectors.toList());
+        assertTrue(parameterAnnotations.contains("@Valid"));
+    }
+
+    private static void checkAnnotation(List<MethodDeclaration> methods, String methodName, List<String> expectedAnnotations) {
+        List<String> annotations = methods.stream()
+                .filter(m -> methodName.equals(m.getNameAsString()))
+                .findFirst()
+                .get()
+                .getAnnotations()
+                .stream()
+                .map(a -> a.toString())
+                .collect(Collectors.toList());
+        for (String expect : expectedAnnotations) {
+            assertTrue(annotations.contains(expect));
+        }
+    }
+
     private Optional<AnnotationExpr> getRegisterProviderAnnotation(ClassOrInterfaceDeclaration declaration,
             String annotationValue) {
         return declaration.getAnnotations()

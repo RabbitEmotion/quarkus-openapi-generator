@@ -213,6 +213,13 @@ public abstract class OpenApiClientGeneratorWrapper {
         return this;
     }
 
+    public OpenApiClientGeneratorWrapper withBeanValidation(final Boolean config) {
+        if (config != null) {
+            configurator.addAdditionalProperty("useBeanValidation", config);
+        }
+        return this;
+    }
+
     public List<File> generate(final String basePackage) {
         this.basePackage = basePackage;
         this.consolidatePackageNames();

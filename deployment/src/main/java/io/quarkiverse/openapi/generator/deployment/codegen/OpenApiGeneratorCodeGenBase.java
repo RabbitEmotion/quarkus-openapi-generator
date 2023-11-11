@@ -196,6 +196,9 @@ public abstract class OpenApiGeneratorCodeGenBase implements CodeGenProvider {
         getValues(config, openApiFilePath, CodegenConfig.ConfigName.MUTINY, Boolean.class)
                 .ifPresent(generator::withMutiny);
 
+        getValues(config, openApiFilePath, CodegenConfig.ConfigName.USE_BEAN_VALIDATION, Boolean.class)
+                .ifPresent(generator::withBeanValidation);
+
         getValues(config, openApiFilePath, CodegenConfig.ConfigName.SKIP_FORM_MODEL, String.class)
                 .ifPresent(generator::withSkipFormModelConfig);
 
